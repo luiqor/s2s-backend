@@ -1,50 +1,62 @@
 const { DOCUMENT_NOT_FOUND } = require('~/consts/errors')
 const { createError } = require('~/utils/errorsHelper')
 
+const createEntityValidator = (invalidModels) => {
+  return async (id, model) => {
+    if (!id) {
+      return
+    }
+
+    const document = await model.findById(id)
+
+    if (!document && !invalidModels.includes(model.modelName)) {
+      invalidModels.push(model.modelName)
+    }
+  }
+}
+
+const validateEntitiesFromParams = async (entitiesParams, reqParams, validateSingleEntity) => {
+  if (!entitiesParams?.length) {
+    return
+  }
+
+  for (const { model, idName } of entitiesParams) {
+    const id = reqParams[idName]
+
+    await validateSingleEntity(id, model)
+  }
+}
+
+const validateEntitiesFromBody = async (entitiesBody, reqBody, validateSingleEntity) => {
+  if (!entitiesBody?.length) {
+    return
+  }
+
+  for (const { model, idName } of entitiesBody) {
+    if (Array.isArray(reqBody[idName])) {
+      await Promise.all(
+        reqBody[idName].map(async (id) => {
+          await validateSingleEntity(id, model)
+        })
+      )
+      return
+    }
+
+    const id = reqBody[idName]
+    await validateSingleEntity(id, model)
+  }
+}
+
 const isEntityValid = (entities) => {
   return async (req, _res, next) => {
-    const models = []
+    const invalidModels = []
 
-    let id = null
+    await validateEntitiesFromParams(entities.params, req.params, createEntityValidator(invalidModels))
 
-    if (entities.params?.length) {
-      for (const { model, idName } of entities.params) {
-        id = req.params[idName]
+    await validateEntitiesFromBody(entities.body, req.body, createEntityValidator(invalidModels))
 
-        if (!id) continue
-
-        const document = await model.findById(id)
-
-        if (!document && !models.includes(model.modelName)) models.push(model.modelName)
-      }
-    }
-
-    if (entities.body?.length) {
-      for (const { model, idName } of entities.body) {
-        if (Array.isArray(req.body[idName])) {
-          await Promise.all(
-            req.body[idName].map(async (id) => {
-              const document = await model.findById(id)
-
-              if (!document && !models.includes(model.modelName)) {
-                models.push(model.modelName)
-              }
-            })
-          )
-        } else {
-          id = req.body[idName]
-
-          if (!id) continue
-
-          const document = await model.findById(id)
-
-          if (!document && !models.includes(model.modelName)) models.push(model.modelName)
-        }
-      }
-    }
-
-    if (models.length) {
-      next(createError(404, DOCUMENT_NOT_FOUND(models)))
+    if (invalidModels.length) {
+      next(createError(404, DOCUMENT_NOT_FOUND(invalidModels)))
     }
 
     next()
