@@ -60,7 +60,9 @@ const userService = {
     const user = await User.findOne({ _id: id, ...(role && { role }) })
       .populate(populateOptions('tutor'))
       .populate(populateOptions('student'))
-      .select('+lastLoginAs +isEmailConfirmed +isFirstLogin +bookmarkedOffers +videoLink +notificationSettings')
+      .select(
+        '+lastLoginAs +isEmailConfirmed +isFirstLogin +bookmarkedOffers +videoLink +notificationSettings +lastSeen'
+      )
       .lean()
       .exec()
     if (isEdit) {
@@ -82,7 +84,7 @@ const userService = {
 
   getUserByEmail: async (email) => {
     const user = await User.findOne({ email })
-      .select('+password +lastLoginAs +isEmailConfirmed +isFirstLogin +appLanguage +notificationSettings')
+      .select('+password +lastLoginAs +isEmailConfirmed +isFirstLogin +appLanguage +notificationSettings +lastSeen')
       .lean()
       .exec()
 
@@ -175,6 +177,18 @@ const userService = {
     }
 
     await User.findByIdAndUpdate(id, filteredUpdateData, { new: true, runValidators: true }).lean().exec()
+  },
+
+  updateLastSeen: async (id) => {
+    const user = await User.findById(id).lean().exec()
+
+    if (!user) {
+      throw createError(404, DOCUMENT_NOT_FOUND([User.modelName]))
+    }
+
+    await User.findByIdAndUpdate(id, { $set: { lastSeen: Date.now() } }, { new: true })
+      .lean()
+      .exec()
   },
 
   _updateMainSubjects: async (mainSubjects, userSubjects, role, userId) => {
