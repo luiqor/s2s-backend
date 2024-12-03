@@ -7,6 +7,7 @@ const isEntityValid = require('~/middlewares/entityValidation')
 const idValidation = require('~/middlewares/idValidation')
 const Course = require('~/models/course')
 const Lesson = require('~/models/lesson')
+
 const Attachment = require('~/models/attachment')
 const {
   roles: { TUTOR }
@@ -21,12 +22,13 @@ const params = [{ model: Course, idName: 'id' }]
 router.use(authMiddleware)
 
 router.param('id', idValidation)
+router.use('/:id', isEntityValid({ params }))
 
-router.get('/:id', isEntityValid({ params }), asyncWrapper(courseController.getCourseById))
+router.get('/:id', asyncWrapper(courseController.getCourseById))
 router.use(restrictTo(TUTOR))
 router.get('/', asyncWrapper(courseController.getCourses))
 router.post('/', isEntityValid({ body }), asyncWrapper(courseController.createCourse))
-router.patch('/:id', isEntityValid({ params }), asyncWrapper(courseController.updateCourse))
-router.delete('/:id', isEntityValid({ params }), asyncWrapper(courseController.deleteCourse))
+router.patch('/:id', asyncWrapper(courseController.updateCourse))
+router.delete('/:id', asyncWrapper(courseController.deleteCourse))
 
 module.exports = router

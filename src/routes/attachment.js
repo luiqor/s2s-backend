@@ -5,8 +5,12 @@ const asyncWrapper = require('~/middlewares/asyncWrapper')
 const idValidation = require('~/middlewares/idValidation')
 const isEntityValid = require('~/middlewares/entityValidation')
 const attachmentController = require('~/controllers/attachment')
-const { authMiddleware, restrictTo } = require('~/middlewares/auth')
+const { authMiddleware, restrictTo, ownershipMiddleware } = require('~/middlewares/auth')
 const {
+  MODEL_CONFIGS: { CooperationModel }
+} = require('~/consts/modelPath')
+const {
+  ownerFields,
   roles: { TUTOR }
 } = require('~/consts/auth')
 
@@ -18,7 +22,12 @@ router.param('id', idValidation)
 
 router.get('/', asyncWrapper(attachmentController.getAttachments))
 router.post('/', upload.array('files'), asyncWrapper(attachmentController.createAttachments))
-router.patch('/:id', isEntityValid({ params }), asyncWrapper(attachmentController.updateAttachment))
-router.delete('/:id', isEntityValid({ params }), asyncWrapper(attachmentController.deleteAttachment))
+router.use(
+  '/:id',
+  isEntityValid({ params }),
+  asyncWrapper(ownershipMiddleware(Attachment, ownerFields, CooperationModel))
+)
+router.patch('/:id', asyncWrapper(attachmentController.updateAttachment))
+router.delete('/:id', asyncWrapper(attachmentController.deleteAttachment))
 
 module.exports = router

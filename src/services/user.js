@@ -343,6 +343,59 @@ const userService = {
     const userCooperations = await cooperationService.getCooperations(aggregateOptions)
 
     return Boolean(userOffers?.length || userCooperations?.length)
+  },
+
+  checkOwnership: async (model, ownerFields, resourceId, userId, relationshipModel = null) => {
+    const resource = await model.findById(resourceId)
+    if (!resource) throw createError(404, DOCUMENT_NOT_FOUND([model.resourceType]))
+
+    const isOwner = ownerFields.some((field) => resource[field] && resource[field].toString() === userId)
+    if (isOwner) return resource
+
+    if (relationshipModel) {
+      const { sectionsResources, resourceField, userFields } = relationshipModel.dynamicPaths
+
+      const query = {
+        [sectionsResources]: { $elemMatch: { [resourceField]: resourceId } },
+        $or: userFields.map((field) => ({ [field]: userId }))
+      }
+
+      const isRelated = await relationshipModel.model.findOne(query)
+
+      if (isRelated) return resource
+    }
+
+    throw createError(403, FORBIDDEN)
+  },
+
+  checkAvailability: async ({ model, relationshipModel, resourceId, userId, expectedAvailability = 'open' }) => {
+    const { sectionsResources, resourceField, availabilityField } = relationshipModel.dynamicPaths
+
+    const isAuthor = await model.findOne({ _id: resourceId, author: userId })
+
+    if (isAuthor) {
+      return true
+    }
+
+    const elemMatchQuery = {
+      [resourceField]: resourceId
+    }
+
+    if (availabilityField) {
+      elemMatchQuery[availabilityField] = expectedAvailability
+    }
+
+    const query = {
+      [sectionsResources]: { $elemMatch: elemMatchQuery }
+    }
+
+    const isAvailable = await relationshipModel.model.findOne(query)
+
+    if (!isAvailable) {
+      throw createError(403, FORBIDDEN)
+    }
+
+    return true
   }
 }
 
