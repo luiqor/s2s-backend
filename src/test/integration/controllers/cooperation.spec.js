@@ -13,8 +13,9 @@ const TokenService = require('~/services/token')
 
 const { DOCUMENT_NOT_FOUND, UNAUTHORIZED, VALIDATION_ERROR, FORBIDDEN } = require('~/consts/errors')
 const {
-  enums: { RESOURCES_TYPES_ENUM }
+  enums: { RESOURCES_TYPES_ENUM, RESOURCE_COMPLETION_STATUS_ENUM }
 } = require('~/consts/validation')
+const { FIELD_IS_NOT_OF_PROPER_ENUM_VALUE } = require('~/consts/errors')
 
 const endpointUrl = '/cooperations/'
 const nonExistingCooperationId = '19cf23e07281224fbbee3241'
@@ -29,7 +30,7 @@ const tutorUserData = {
   password: 'supermagicpass123',
   appLanguage: 'en',
   isEmailConfirmed: true,
-  lastLogin: new Date().toJSON()
+  lastLoginAs: 'tutor'
 }
 
 const studentUserData = {
@@ -40,18 +41,18 @@ const studentUserData = {
   password: 'supermagicpass123',
   appLanguage: 'en',
   isEmailConfirmed: true,
-  lastLogin: new Date().toJSON()
+  lastLoginAs: 'student'
 }
 
-const anotherUserData = {
-  role: ['tutor'],
+const anotherStudentUserData = {
+  role: ['student'],
   firstName: 'james',
   lastName: 'potter',
   email: 'jamespotter@gmail.com',
   password: 'supersecretpass888',
   appLanguage: 'en',
   isEmailConfirmed: true,
-  lastLogin: new Date().toJSON()
+  lastLoginAs: 'student'
 }
 
 const testCooperationData = {
@@ -65,17 +66,15 @@ const testCooperationData = {
       description: 'Solving Quadratic Equations Using the Quadratic Formula',
       resources: [
         {
-          resource: {
-            _id: '6684179479e5232bce4579fa',
-            author: '6658f73f93885febb491e08b',
-            content: '<p><strong>Solving Quadratic Equations Using the Quadratic Formula</strong></p>',
-            description: 'The quadratic formula',
-            title: 'Solving Quadratic Equations Using the Quadratic Formula',
-            category: '6684175179e5232bce4579ed',
-            resourceType: RESOURCES_TYPES_ENUM[0]
-          },
+          resource: '6684179479e5232bce4579fa',
+          author: '6658f73f93885febb491e08b',
+          content: '<p><strong>Solving Quadratic Equations Using the Quadratic Formula</strong></p>',
+          description: 'The quadratic formula',
+          title: 'Solving Quadratic Equations Using the Quadratic Formula',
+          category: '6684175179e5232bce4579ed',
           resourceType: RESOURCES_TYPES_ENUM[0],
-          availability: { status: 'open', date: null }
+          availability: { status: 'open', date: null },
+          completionStatus: RESOURCE_COMPLETION_STATUS_ENUM[0]
         }
       ]
     }
@@ -123,6 +122,10 @@ const updatedSections = [
   }
 ]
 
+const updatedResourceCompletionStatus = {
+  completionStatus: 'completed'
+}
+
 const testInitiator = {
   _id: '66b346570182fc9e49b09647',
   averageRating: {
@@ -163,7 +166,7 @@ describe('Cooperation controller', () => {
     server,
     accessToken,
     testOffer,
-    anotherUserAccessToken,
+    anotherStudentAccessToken,
     testCooperation,
     testStudentUser,
     testTutorUser,
@@ -175,7 +178,7 @@ describe('Cooperation controller', () => {
 
   beforeEach(async () => {
     accessToken = await testUserAuthentication(app, studentUserData)
-    anotherUserAccessToken = await testUserAuthentication(app, anotherUserData)
+    anotherStudentAccessToken = await testUserAuthentication(app, anotherStudentUserData)
     testStudentUser = TokenService.validateAccessToken(accessToken)
     testTutorUser = await User.create(tutorUserData)
 
@@ -505,8 +508,63 @@ describe('Cooperation controller', () => {
     it('should throw FORBIDDEN if user is not the initiator or receiver', async () => {
       const response = await app
         .patch(endpointUrl + testCooperation._body._id)
-        .set('Cookie', [`accessToken=${anotherUserAccessToken}`])
+        .set('Cookie', [`accessToken=${anotherStudentAccessToken}`])
         .send(updateStatus)
+
+      expectError(403, FORBIDDEN, response)
+    })
+  })
+
+  describe(`PATCH ${endpointUrl}:id/:resourceId/completionStatus`, () => {
+    it('should update the completion status of a resource for valid request', async () => {
+      const resourceId = testCooperation._body.sections[0].resources[0].resource
+
+      const updateResponse = await app
+        .patch(`${endpointUrl}${testCooperation._body._id}/${resourceId}/completionStatus`)
+        .set('Cookie', [`accessToken=${accessToken}`])
+        .send(updatedResourceCompletionStatus)
+
+      expect(updateResponse.status).toBe(204)
+
+      const response = await app
+        .get(endpointUrl + testCooperation._body._id)
+        .set('Cookie', [`accessToken=${accessToken}`])
+
+      expect(response.body.sections[0].resources[0].resource.completionStatus).toBe(
+        updatedResourceCompletionStatus.status
+      )
+    })
+
+    it('should throw FIELD_IS_NOT_OF_PROPER_ENUM_VALUE for invalid completion status', async () => {
+      const resourceId = testCooperation._body.sections[0].resources[0].resource
+      const invalidCompletionStatus = { completionStatus: 'invalidStatus' }
+
+      const response = await app
+        .patch(`${endpointUrl}${testCooperation._body._id}/${resourceId}/completionStatus`)
+        .set('Cookie', [`accessToken=${accessToken}`])
+        .send(invalidCompletionStatus)
+
+      expectError(422, FIELD_IS_NOT_OF_PROPER_ENUM_VALUE('completionStatus', RESOURCE_COMPLETION_STATUS_ENUM), response)
+    })
+
+    it('should throw DOCUMENT_NOT_FOUND for invalid resource ID', async () => {
+      const resourceId = 'invalidId'
+
+      const updateResponse = await app
+        .patch(`${endpointUrl}${testCooperation._body._id}/${resourceId}/completionStatus`)
+        .set('Cookie', [`accessToken=${accessToken}`])
+        .send(updatedResourceCompletionStatus)
+
+      expectError(404, DOCUMENT_NOT_FOUND([`Resource in ${Cooperation.modelName}`]), updateResponse)
+    })
+
+    it('should throw FORBIDDEN for user who is not the initiator or receiver', async () => {
+      const resourceId = testCooperation._body.sections[0].resources[0].resource
+
+      const response = await app
+        .patch(`${endpointUrl}${testCooperation._body._id}/${resourceId}/completionStatus`)
+        .set('Cookie', [`accessToken=${anotherStudentAccessToken}`])
+        .send(updatedResourceCompletionStatus)
 
       expectError(403, FORBIDDEN, response)
     })

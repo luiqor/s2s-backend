@@ -406,3 +406,105 @@ paths:
                 status: 404
                 code: DOCUMENT_NOT_FOUND
                 message: Cooperation with the specified id was not found.
+  /cooperations/{id}/{resourceId}/completionStatus:
+    patch:
+      security:
+        - cookieAuth: []
+      tags:
+        - Cooperations
+      summary: Update completion status of resource in cooperation by ID
+      description: Finds and update a completion status of resource in cooperation with the specified ID.
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Cooperation ID
+          schema:
+            type: string
+        - name: resourceId
+          in: path
+          required: true
+          description: Resource ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: Provide required data to update completion status of resource in cooperation.
+        content:
+          application/json:
+            schema:
+              properties:
+                completionStatus:
+                  $ref: '#/definitions/completionStatus'
+            example:
+              completionStatus: completed
+      responses:
+        204:
+          description: No Content
+          links:
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/Error'
+              example:
+                status: 400
+                code: INVALID_ID
+                message: ID is invalid.
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/Error'
+              example:
+                status: 401
+                code: UNAUTHORIZED
+                message: The requested URL requires user authorization.
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/Error'
+              examples:
+                Forbidden:
+                  value:
+                    status: 403
+                    code: FORBIDDEN
+                    message: You do not have permission to perform this action.
+                'Role required for action':
+                  value:
+                    status: 403
+                    code: ROLE_REQUIRED_FOR_ACTION
+                    message: Only student can perform this action.
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/Error'
+              example:
+                status: 404
+                code: DOCUMENT_NOT_FOUND
+                message: Resource in Cooperation with the specified ID was not found.
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/Error'
+              examples:
+                'Field is not of proper enum value':
+                  value:
+                    status: 422
+                    code: FIELD_IS_NOT_OF_PROPER_ENUM_VALUE
+                    message: 'completionStatus should be either one of the values: [active, completed]'
+                'Field is not defined':
+                  value:
+                    status: 422
+                    code: FIELD_IS_NOT_DEFINED
+                    message: completionStatus field should be defined

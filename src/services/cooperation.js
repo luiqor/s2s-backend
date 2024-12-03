@@ -3,9 +3,19 @@ const mergeArraysUniqueValues = require('~/utils/mergeArraysUniqueValues')
 const removeArraysUniqueValues = require('~/utils/removeArraysUniqueValues')
 const handleResources = require('~/utils/handleResources')
 const { createError, createForbiddenError } = require('~/utils/errorsHelper')
-const { VALIDATION_ERROR, DOCUMENT_NOT_FOUND } = require('~/consts/errors')
+const { VALIDATION_ERROR, DOCUMENT_NOT_FOUND, ROLE_REQUIRED_FOR_ACTION } = require('~/consts/errors')
+const { roles } = require('~/consts/auth')
 
 const cooperationService = {
+  _validateCooperationUser: (cooperation, userId) => {
+    const initiator = cooperation.initiator.toString()
+    const receiver = cooperation.receiver.toString()
+
+    if (initiator !== userId && receiver !== userId) {
+      throw createForbiddenError()
+    }
+  },
+
   getCooperations: async (pipeline) => {
     const [result] = await Cooperation.aggregate(pipeline).exec()
     return result
@@ -69,17 +79,8 @@ const cooperationService = {
       throw createError(409, VALIDATION_ERROR('You can change only either the status or the price in one operation'))
     }
 
-    const cooperation = await Cooperation.findById(id).exec()
-    if (!cooperation) {
-      throw createError(404, DOCUMENT_NOT_FOUND(Cooperation.modelName))
-    }
-
-    const initiator = cooperation.initiator.toString()
-    const receiver = cooperation.receiver.toString()
-
-    if (initiator !== currentUserId && receiver !== currentUserId) {
-      throw createForbiddenError()
-    }
+    const cooperation = await Cooperation.findById(id)
+    cooperationService._validateCooperationUser(cooperation, currentUserId)
 
     if (price) {
       if (currentUserRole !== cooperation.needAction.toString()) {
@@ -114,6 +115,38 @@ const cooperationService = {
       cooperation.availableQuizzes = removeArraysUniqueValues(cooperation.availableQuizzes, cooperation.finishedQuizzes)
       await cooperation.save()
     }
+  },
+
+  updateResourceCompletionStatus: async ({ id, currentUser, resourceId, completionStatus }) => {
+    const { id: currentUserId, role: currentUserRole } = currentUser
+
+    if (currentUserRole !== roles.STUDENT) {
+      throw createError(403, ROLE_REQUIRED_FOR_ACTION(roles.STUDENT))
+    }
+
+    const cooperation = await Cooperation.findById(id)
+    cooperationService._validateCooperationUser(cooperation, currentUserId)
+
+    let resourceIdExists = false
+
+    for (const section of cooperation.sections) {
+      for (const resource of section.resources) {
+        if (resource.resource.toString() === resourceId) {
+          resource.completionStatus = completionStatus
+          resourceIdExists = true
+          break
+        }
+      }
+    }
+
+    if (!resourceIdExists) {
+      throw createError(404, DOCUMENT_NOT_FOUND([`Resource in ${Cooperation.modelName}`]))
+    }
+
+    cooperation.markModified('sections')
+
+    await cooperation.validate()
+    await cooperation.save()
   }
 }
 
