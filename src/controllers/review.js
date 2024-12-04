@@ -1,24 +1,19 @@
 const reviewService = require('~/services/review')
 const getMatchOptions = require('~/utils/getMatchOptions')
+const checkIdValidity = require('~/utils/checkIdValidity')
 
 const getReviews = async (req, res) => {
-  const { id: targetUserId } = req.params
-  const { role: targetUserRole, rating, skip, limit } = req.query
+  const { user: targetUserId, role: targetUserRole, rating, skip, limit } = req.query
+
+  if (targetUserId) {
+    checkIdValidity(targetUserId)
+  }
 
   const match = getMatchOptions({ targetUserId, targetUserRole, rating })
 
-  const reviews = await reviewService.getReviews(match, parseInt(skip), parseInt(limit))
+  const reviews = await reviewService.getReviews(match, skip, limit)
 
   res.status(200).json(reviews)
-}
-
-const getReviewStatsByUserId = async (req, res) => {
-  const { id } = req.params
-  const { role } = req.query
-
-  const reviewStats = await reviewService.getReviewStatsByUserId(id, role)
-
-  res.status(200).json(reviewStats)
 }
 
 const getReviewById = async (req, res) => {
@@ -50,15 +45,15 @@ const updateReview = async (req, res) => {
 
 const deleteReview = async (req, res) => {
   const { id } = req.params
+  const { id: currentUserId } = req.user
 
-  await reviewService.deleteReview(id)
+  await reviewService.deleteReview(id, currentUserId)
 
   res.status(204).end()
 }
 
 module.exports = {
   getReviews,
-  getReviewStatsByUserId,
   getReviewById,
   addReview,
   updateReview,

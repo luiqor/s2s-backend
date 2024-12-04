@@ -12,10 +12,10 @@ const {
 const {
   roles: { TUTOR }
 } = require('~/consts/auth')
-const calculateReviewStats = require('~/utils/reviews/reviewStatsAggregation')
 
 const endpointUrl = '/reviews/'
 const offerEndpointUrl = '/offers/'
+const cooperationEndpointUrl = '/cooperations/'
 const subjectEndpointUrl = '/subjects/'
 
 const nonExistingReviewId = '63bed9ef260f18d04ab15da2'
@@ -25,10 +25,10 @@ let reviewBody = {
   rating: 5,
   targetUserRole: 'student'
 }
+
 let offerBody = {
   title: 'Test title',
   price: 330,
-  proficiencyLevel: ['Beginner'],
   description: 'TEST 123ASD',
   languages: ['Ukrainian'],
   category: {
@@ -36,6 +36,14 @@ let offerBody = {
     appearance: { icon: 'mocked-path-to-icon', color: '#66C42C' }
   }
 }
+
+let cooperationBody = {
+  title: 'Test title',
+  price: 99,
+  receiverRole: 'tutor',
+  proficiencyLevel: 'Intermediate'
+}
+
 let subjectBody = {
   name: 'English',
   category: ''
@@ -58,10 +66,10 @@ const tutorUserData = {
 }
 
 describe('Review controller', () => {
-  let app, server, accessToken, tutorAccessToken, testOffer, testReview, testSubject, userId
+  let app, server, accessToken, tutorAccessToken, testOffer, testReview, testSubject, userId, testCooperation
 
   beforeAll(async () => {
-    ({ app, server } = await serverInit())
+    ;({ app, server } = await serverInit())
   })
 
   beforeEach(async () => {
@@ -69,9 +77,12 @@ describe('Review controller', () => {
     accessToken = await testUserAuthentication(app)
     tutorAccessToken = await testUserAuthentication(app, tutorUserData)
 
-    const decoded = jwt.verify(accessToken, JWT_ACCESS_SECRET)
+    const decoded = jwt.verify(tutorAccessToken, JWT_ACCESS_SECRET)
     userId = decoded.id
     reviewBody.targetUserId = userId
+
+    const decodedAuthor = jwt.verify(accessToken, JWT_ACCESS_SECRET)
+    const authorId = decodedAuthor.id
 
     const categoryResponse = await Category.find()
 
@@ -95,6 +106,18 @@ describe('Review controller', () => {
 
     offerBody = testOffer.body
     offerBody.category = category
+
+    testCooperation = await app
+      .post(cooperationEndpointUrl)
+      .set('Cookie', [`accessToken=${accessToken}`])
+      .send({
+        ...cooperationBody,
+        offer: offerBody._id,
+        initiator: authorId,
+        receiver: reviewBody.targetUserId
+      })
+
+    cooperationBody = testCooperation.body
 
     testReview = await app
       .post(endpointUrl)
@@ -169,12 +192,12 @@ describe('Review controller', () => {
             offer: {
               _id,
               category: offerBody.category,
-              proficiencyLevel: ['Beginner'],
               subject: {
                 _id: subject,
                 name: 'English'
               }
             },
+            proficiencyLevel: 'Intermediate',
             createdAt: expect.any(String),
             updatedAt: expect.any(String)
           }
@@ -211,12 +234,12 @@ describe('Review controller', () => {
         offer: {
           _id,
           category: offerBody.category,
-          proficiencyLevel: ['Beginner'],
           subject: {
             _id: subject,
             name: 'English'
           }
         },
+        proficiencyLevel: 'Intermediate',
         createdAt: expect.any(String),
         updatedAt: expect.any(String)
       })
@@ -281,13 +304,6 @@ describe('Review controller', () => {
       const response = await app.delete(endpointUrl + nonExistingReviewId).set('Cookie', [`accessToken=${accessToken}`])
 
       expectError(404, DOCUMENT_NOT_FOUND([Review.modelName]), response)
-    })
-  })
-
-  describe('reviewStatsAggregation block', () => {
-    it('should return empty stats with no reviews', async () => {
-      const stats = await calculateReviewStats(nonExistingReviewId, reviewBody.targetUserRole)
-      expect(stats).toEqual({})
     })
   })
 })

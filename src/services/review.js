@@ -1,27 +1,21 @@
 const Review = require('~/models/review')
 const calculateReviewStats = require('~/utils/reviews/reviewStatsAggregation')
-const { createForbiddenError } = require('~/utils/errorsHelper')
+const { createForbiddenError, createError } = require('~/utils/errorsHelper')
 const filterAllowedFields = require('~/utils/filterAllowedFields')
 const { allowedReviewFieldsForUpdate } = require('~/validation/services/review')
+const cooperationService = require('./cooperation')
+const { CANNOT_TARGET_SELF } = require('~/consts/errors')
+const getReviewsAggregateOptions = require('~/utils/reviews/getReviewsAggregateOptions')
 
 const reviewService = {
   getReviews: async (match, skip, limit) => {
-    const count = await Review.countDocuments(match)
+    skip = parseInt(skip) || null
+    limit = parseInt(limit) || null
 
-    const reviews = await Review.find(match)
-      .populate({ path: 'author', select: ['firstName', 'lastName', 'photo'] })
-      .populate({
-        path: 'offer',
-        select: ['subject', 'proficiencyLevel', 'category'],
-        populate: [
-          { path: 'category', select: 'name' },
-          { path: 'subject', select: 'name' }
-        ]
-      })
-      .skip(skip)
-      .limit(limit)
-      .lean()
-      .exec()
+    const count = await Review.countDocuments(match).skip(skip).limit(limit).exec()
+
+    const pipeline = getReviewsAggregateOptions(match, skip, limit)
+    const reviews = await Review.aggregate(pipeline).exec()
 
     return {
       count,
@@ -29,16 +23,12 @@ const reviewService = {
     }
   },
 
-  getReviewStatsByUserId: async (id, role) => {
-    return await calculateReviewStats(id, role)
-  },
-
   getReviewById: async (id) => {
-    return await Review.findById(id)
+    const review = await Review.findById(id)
       .populate({ path: 'author', select: ['firstName', 'lastName', 'photo'] })
       .populate({
         path: 'offer',
-        select: ['subject', 'proficiencyLevel', 'category'],
+        select: ['subject', 'category'],
         populate: [
           { path: 'category', select: 'name' },
           { path: 'subject', select: 'name' }
@@ -46,12 +36,25 @@ const reviewService = {
       })
       .lean()
       .exec()
+
+    const {
+      offer: { _id: offerId },
+      author,
+      targetUserId
+    } = review
+    review.proficiencyLevel = await cooperationService.getProficiencyLevel(offerId, author, targetUserId)
+
+    return review
   },
 
   addReview: async (author, data) => {
     const { comment, rating, targetUserId, targetUserRole, offer } = data
 
-    return await Review.create({
+    if (author === targetUserId) {
+      throw createError(400, CANNOT_TARGET_SELF)
+    }
+
+    const review = await Review.create({
       comment,
       rating,
       author,
@@ -59,6 +62,10 @@ const reviewService = {
       targetUserRole,
       offer
     })
+
+    await calculateReviewStats(targetUserId, targetUserRole)
+
+    return review
   },
 
   updateReview: async (id, currentUserId, updateData) => {
@@ -75,11 +82,24 @@ const reviewService = {
     for (const field in filteredUpdateData) {
       review[field] = filteredUpdateData[field]
     }
+
     await review.save()
+
+    const { targetUserId, targetUserRole } = review
+    await calculateReviewStats(targetUserId, targetUserRole)
   },
 
-  deleteReview: async (id) => {
+  deleteReview: async (id, currentUserId) => {
+    const review = await Review.findById(id).lean().exec()
+    const { targetUserId, targetUserRole } = review
+
+    const author = review.author.toString()
+    if (author !== currentUserId) {
+      throw createForbiddenError()
+    }
+
     await Review.findByIdAndRemove(id).exec()
+    await calculateReviewStats(targetUserId, targetUserRole)
   }
 }
 
