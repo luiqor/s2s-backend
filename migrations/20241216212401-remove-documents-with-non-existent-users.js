@@ -13,7 +13,6 @@ module.exports = {
       if (nonExistingUsers.length > 0) {
         await db.collection(collectionName).deleteMany({ author: { $in: nonExistingUsers } })
       }
-      console.log(`Removed ${nonExistingUsers.length} non-existing users from collection ${collectionName}`)
     }
   },
 
