@@ -22,6 +22,7 @@ describe('20241203085442-remove-resource-type-from-quizzes', () => {
   })
 
   afterAll(async () => {
+    await up(database)
     await client.close()
   })
 
