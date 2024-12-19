@@ -1,6 +1,7 @@
 const Cooperation = require('~/models/cooperation')
 const mergeArraysUniqueValues = require('~/utils/mergeArraysUniqueValues')
 const removeArraysUniqueValues = require('~/utils/removeArraysUniqueValues')
+const getCooperationByIdQueryPipeline = require('~/utils/cooperations/getCooperationByIdQueryPipeline')
 const handleResources = require('~/utils/handleResources')
 const { createError, createForbiddenError } = require('~/utils/errorsHelper')
 const { VALIDATION_ERROR, DOCUMENT_NOT_FOUND, ROLE_REQUIRED_FOR_ACTION } = require('~/consts/errors')
@@ -24,36 +25,14 @@ const cooperationService = {
     return result
   },
 
-  getCooperationById: async (id) => {
-    return await (
-      await Cooperation.findById(id)
-    ).populate([
-      { path: 'sections.resources.resource', select: '-createdAt -updatedAt' },
-      {
-        path: 'offer',
-        populate: [
-          {
-            path: 'category',
-            select: ['name', 'appearance']
-          },
-          {
-            path: 'subject',
-            select: 'name'
-          },
-          {
-            path: 'author',
-            select: ['firstName', 'lastName', 'photo', 'professionalSummary', 'totalReviews', 'FAQ', 'averageRating']
-          }
-        ],
-        select: ['id', 'author', 'category', 'subject', 'title', 'languages', 'proficiencyLevel', 'description']
-      },
-      {
-        path: 'initiator'
-      },
-      {
-        path: 'receiver'
-      }
-    ])
+  getCooperationById: async (id, userRole) => {
+    const isClosedResourcesHidden = userRole === roles.STUDENT
+
+    const pipeline = getCooperationByIdQueryPipeline(id, isClosedResourcesHidden)
+
+    const [cooperationById] = await Cooperation.aggregate(pipeline)
+
+    return cooperationById
   },
 
   createCooperation: async (initiator, initiatorRole, data) => {
