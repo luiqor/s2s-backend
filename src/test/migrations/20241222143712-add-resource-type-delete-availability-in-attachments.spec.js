@@ -18,11 +18,11 @@ describe('20241222143712-add-resource-type-delete-availability-in-attachments', 
     client = new MongoClient(url)
     await client.connect()
     database = client.db(databaseName)
-    database.collection(collectionName).deleteMany({})
+    await database.collection(collectionName).deleteMany({})
   })
 
   afterAll(async () => {
-    database.collection(collectionName).deleteMany({})
+    await database.collection(collectionName).deleteMany({})
     await client.close()
   })
 
