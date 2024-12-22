@@ -77,6 +77,7 @@ describe('20241220213859-delete-old-fields-in-cooperatives-and-add-new-ones', ()
   beforeAll(async () => {
     client = new MongoClient(url)
     database = client.db(databaseName)
+    await database.collection(cooperationCollection).deleteMany({})
 
     await database.collection(usersColection).insertMany(users)
     await database.collection(cooperationCollection).insertOne(validCooperation)
