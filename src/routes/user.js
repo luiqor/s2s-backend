@@ -26,7 +26,6 @@ router.param('offerId', idValidation)
 router.use('/:id/cooperations', isEntityValid({ params }), cooperationRouter)
 router.use('/:id/offers', isEntityValid({ params }), offerRouter)
 
-router.get('/', asyncWrapper(userController.getUsers))
 router.get(
   '/:id',
   isEntityValid({ params }),
@@ -44,6 +43,7 @@ router.patch(
 )
 
 router.use(restrictTo(ADMIN))
+router.get('/', asyncWrapper(userController.getUsers))
 router.patch('/:id/change-status', isEntityValid({ params }), asyncWrapper(userController.updateStatus))
 router.delete('/:id', isEntityValid({ params }), asyncWrapper(userController.blockUser))
 
