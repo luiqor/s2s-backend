@@ -17,7 +17,7 @@ const enums = {
   SPOKEN_LANG_ENUM: ['English', 'Ukrainian', 'Polish', 'German', 'French', 'Spanish', 'Arabic'],
   PROFICIENCY_LEVEL_ENUM: ['Beginner', 'Intermediate', 'Advanced', 'Test Preparation', 'Professional', 'Specialized'],
   ROLE_ENUM: ['student', 'tutor', 'admin', 'superadmin'],
-  LOGIN_ROLE_ENUM: ['student', 'tutor', 'admin'],
+  LOGIN_ROLE_ENUM: ['student', 'tutor', 'admin', 'superadmin'],
   MAIN_ROLE_ENUM: ['student', 'tutor'],
   STATUS_ENUM: ['active', 'blocked', 'deactivated'],
   COOPERATION_STATUS_ENUM: ['pending', 'active', 'declined', 'closed', 'request to close'],
