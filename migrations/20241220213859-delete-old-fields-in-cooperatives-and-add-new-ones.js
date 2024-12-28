@@ -10,7 +10,7 @@ function transformSection(section) {
   transformedSection.resources = section.activities.map((activity) => {
     const transformedResource = {}
 
-    if (activity.resource && activity.resource._id) {
+    if (activity.resource?._id) {
       transformedResource.resource = activity.resource._id
     }
 
@@ -30,6 +30,28 @@ function transformSection(section) {
     return transformedResource
   })
   return transformedSection
+}
+
+async function processSections(db, cooperation) {
+  if (!cooperation.sections) {
+    await db.collection('cooperation').updateOne({ _id: cooperation._id }, { $set: { sections: [] } })
+  } else {
+    const isStructureCorrect = cooperation.sections.every(
+      (section) =>
+        section.title &&
+        typeof section.title === 'string' &&
+        section.description &&
+        typeof section.description === 'string' &&
+        Array.isArray(section.resources)
+    )
+
+    if (!isStructureCorrect && cooperation.sections.length !== 0) {
+      const transformedSections = cooperation.sections.map((section) => transformSection(section))
+      const nonEmptySections = transformedSections.filter((section) => Object.keys(section).length > 0)
+
+      await db.collection('cooperation').updateOne({ _id: cooperation._id }, { $set: { sections: nonEmptySections } })
+    }
+  }
 }
 
 module.exports = {
@@ -69,27 +91,7 @@ module.exports = {
 
         await db.collection('cooperation').updateOne({ _id: cooperation._id }, { $set: { title: cooperationTitle } })
       }
-      if (!cooperation.sections) {
-        await db.collection('cooperation').updateOne({ _id: cooperation._id }, { $set: { sections: [] } })
-      } else {
-        const isStructureCorrect = cooperation.sections.every(
-          (section) =>
-            section.title &&
-            typeof section.title === 'string' &&
-            section.description &&
-            typeof section.description === 'string' &&
-            Array.isArray(section.resources)
-        )
-
-        if (!isStructureCorrect && cooperation.sections.length !== 0) {
-          const transformedSections = cooperation.sections.map((section) => transformSection(section))
-          const nonEmptySections = transformedSections.filter((section) => Object.keys(section).length > 0)
-
-          await db
-            .collection('cooperation')
-            .updateOne({ _id: cooperation._id }, { $set: { sections: nonEmptySections } })
-        }
-      }
+      await processSections(db, cooperation)
     }
     await db.collection('cooperation').updateMany(
       {
