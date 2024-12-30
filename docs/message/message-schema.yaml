@@ -5,21 +5,15 @@ definitions:
       items:
         type: array
         items:
-          $ref: '#/definitions/message'
+          $ref: '#/definitions/messageFullInfo'
       count:
         type: integer
         description: Total number of messages
   messageBody:
     type: object
     properties:
-      author:
-        type: string
-        ref: '#/components/user'
       text:
         type: string
-      chat:
-        type: string
-        ref: '#/components/chat'
   message:
     type: object
     properties:
@@ -28,11 +22,7 @@ definitions:
       author:
         type: object
         properties:
-          _id:
-            type: string
-            ref: '#/components/user'
-          photo:
-            type: string
+
       authorRole:
         type: string
         enum:
@@ -46,10 +36,54 @@ definitions:
         type: boolean
       chat:
         type: string
-        ref: '#/components/chat'
+      clearedFor:
+        type: array
+        items:
+          properties:
+            type: object
+            properties:
+              user:
+                type: string  
       createdAt:
         type: string
         format: date-time
       updatedAt:
         type: string
         format: date-time
+  messageFullInfo:
+    type: object
+    properties:
+      _id:
+          type: string
+      author:
+        type: object
+        $ref: '#/components/user'
+      authorRole:
+        type: string
+        enum:
+          - student
+          - tutor
+      text:
+        type: string
+      isRead:
+        type: boolean
+      isNotified:
+        type: boolean
+      chat:
+        type: string
+      clearedFor:
+        type: array
+        items:
+          properties:
+            type: object
+            properties:
+              user:
+                type: string  
+      createdAt:
+        type: string
+        format: date-time
+      updatedAt:
+        type: string
+        format: date-time
+
+    

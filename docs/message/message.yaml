@@ -1,5 +1,5 @@
 paths:
-  /messages:
+  /chats/{id}/messages:
     post:
       security:
         - cookieAuth: []
@@ -9,6 +9,12 @@ paths:
       description: Create and save a new message to database.
       produces:
         - application/json
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the chat
+        type: string
       requestBody:
         required: true
         description: Create new message.
@@ -17,24 +23,23 @@ paths:
             schema:
               $ref: '#/definitions/messageBody'
             example:
-              text: 'Some text'
-              isRead: false
-              isNotified: false
+              text: 'Hi, you want to start cooperation with me?'
       responses:
         201:
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/definitions/messages'
+                $ref: '#/definitions/message'
               example:
                 - _id: 64a28e8c5d56f749c7d915d0
-                  author: { _id: 6421d9833cdf38b706756dff, photo: 1687425744398-ITA wallpapers-19.png }
+                  author: 6421d9833cdf38b706756dff
                   authorRole: 'student'
-                  text: 'Some text'
+                  text: 'Hi, you want to start cooperation with me?'
                   isRead: false
-                  isNotified: false
+                  isNotified: true
                   chat: 6421d9833cdf38b706756dfd
+                  clearedFor: []
                   createdAt: 2023-20-01T13:25:36.292Z
                   updatedAt: 2023-20-01T13:25:36.292Z
         401:
@@ -67,11 +72,13 @@ paths:
           schema:
             type: integer
           required: false
+          description: Limit of messages amount that need to get 
         - in: query
           name: skip
           schema:
             type: integer
           required: false
+          description: Amount of messages that needs to skip
         - in: query
           name: message
           schema:
@@ -87,11 +94,65 @@ paths:
               example:
                 items:
                   - _id: 64a28e8c5d56f749c7d915d0
-                    author: { _id: 6421d9833cdf38b706756dff, photo: 1687425744398-ITA wallpapers-19.png }
+                    author:
+                      _id: 6421d9833cdf38b706756dff
+                      role: student
+                      firstName: John
+                      lastName: Doe
+                      email: johndoe@gmail.com
+                      mainSubjects:
+                        student:
+                          - _id: 64593435163b62124ce4c3ab
+                            category:
+                              _id: '6421ed8ed991d46a84721df2'
+                              name: Cybersecurity
+                              appearance:
+                                icon: IconName
+                                color: '#123456'
+                            subjects:
+                              - _id: '6421ed8ed991d46a84721df2'
+                                name: XSS Attack
+                            isDeletionBlocked: false
+                        tutor: []
+                      totalReviews:
+                        student: 10
+                        tutor: 0
+                      averageRating:
+                        student: 4.5
+                        tutor: 0
+                      nativeLanguage: English
+                      address:
+                        country: The USA
+                        city: California
+                      professionalSummary: KNPU H.S. Skovoroda
+                      photo: john-doe-photo.jpg
+                      status:
+                        student: active
+                        tutor: active
+                        admin: active
+                      isEmailConfirmed: true
+                      isFirstLogin: true
+                      lastLogin: 2022-09-02T11:59:53.243+00:00
+                      lastSeen: 2022-09-02T11:59:53.243+00:00
+                      bookmarkedOffers: []
+                      FAQ:
+                        student:
+                          - question: tutor question
+                            _id: 63525e23bf163f5ea609ff2b
+                            answer: tutor answer
+                        tutor:
+                          - question: tutor question
+                            _id: 63525e23bf163f5ea609ff2b
+                            answer: tutor answer
+                      videoLink:
+                        student: www.youtube.com/watch?v=ebTnuLRnIOY
+                        tutor: www.youtube.com/watch?v=ebTnuLRnIOY
+                      createdAt: 2021-04-09T11:34:53.243+00:00
+                      updatedAt: 2022-09-02T11:59:53.243+00:00
                     authorRole: 'student'
-                    text: 'Some text'
+                    text: 'Hi, you want to start cooperation with me?'
                     isRead: false
-                    isNotified: false
+                    isNotified: true
                     chat: 6421d9833cdf38b706756dfd
                     createdAt: 2023-20-01T13:25:36.292Z
                     updatedAt: 2023-20-01T13:25:36.292Z
