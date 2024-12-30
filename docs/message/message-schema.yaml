@@ -19,10 +19,6 @@ definitions:
     properties:
       _id:
         type: string
-      author:
-        type: object
-        properties:
-
       authorRole:
         type: string
         enum:
@@ -39,11 +35,10 @@ definitions:
       clearedFor:
         type: array
         items:
+          type: object
           properties:
-            type: object
-            properties:
-              user:
-                type: string  
+            user:
+              type: string  
       createdAt:
         type: string
         format: date-time
@@ -52,38 +47,9 @@ definitions:
         format: date-time
   messageFullInfo:
     type: object
-    properties:
-      _id:
-          type: string
-      author:
-        type: object
-        $ref: '#/components/user'
-      authorRole:
-        type: string
-        enum:
-          - student
-          - tutor
-      text:
-        type: string
-      isRead:
-        type: boolean
-      isNotified:
-        type: boolean
-      chat:
-        type: string
-      clearedFor:
-        type: array
-        items:
-          properties:
-            type: object
-            properties:
-              user:
-                type: string  
-      createdAt:
-        type: string
-        format: date-time
-      updatedAt:
-        type: string
-        format: date-time
-
-    
+    allOf:
+      - $ref: '#/definitions/message'
+      - properties:
+          author:
+            type: string
+            ref: '#/components/user'
