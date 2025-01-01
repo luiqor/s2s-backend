@@ -5,7 +5,7 @@ definitions:
       items:
         type: array
         items:
-          $ref: '#/definitions/messageFullInfo'
+          $ref: '#/definitions/messageWithAuthor'
       count:
         type: integer
         description: Total number of messages
@@ -45,11 +45,11 @@ definitions:
       updatedAt:
         type: string
         format: date-time
-  messageFullInfo:
+  messageWithAuthor:
     type: object
     allOf:
       - $ref: '#/definitions/message'
       - properties:
           author:
-            type: string
-            ref: '#/components/user'
+            type: object
+            $ref: '#/definitions/user'
