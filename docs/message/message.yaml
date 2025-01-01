@@ -23,7 +23,7 @@ paths:
             schema:
               $ref: '#/definitions/messageBody'
             example:
-              text: 'Hi, you want to start cooperation with me?'
+              text: Hi, you want to start cooperation with me?
       responses:
         201:
           description: OK
@@ -34,8 +34,8 @@ paths:
               example:
                 - _id: 64a28e8c5d56f749c7d915d0
                   author: 6421d9833cdf38b706756dff
-                  authorRole: 'student'
-                  text: 'Hi, you want to start cooperation with me?'
+                  authorRole: student
+                  text: Hi, you want to start cooperation with me?
                   isRead: false
                   isNotified: true
                   chat: 6421d9833cdf38b706756dfd
@@ -50,8 +50,8 @@ paths:
                 $ref: '#/components/Error'
               example:
                 status: 401
-                code: 'UNAUTHORIZED'
-                message: 'The requested URL requires user authorization.'
+                code: UNAUTHORIZED
+                message: The requested URL requires user authorization.
     get:
       security:
         - cookieAuth: []
@@ -95,9 +95,9 @@ paths:
                 $ref: '#/definitions/messages'
               example:
                 items:
-                  - _id: "64a28e8c5d56f749c7d915d0"
+                  - _id: 64a28e8c5d56f749c7d915d0
                     author:
-                      _id: "666c26bd89ff51666ab119d2"
+                      _id: 666c26bd89ff51666ab119d2
                       firstName: John
                       lastName: Doe
                       totalReviews:
@@ -111,33 +111,33 @@ paths:
                         student: active
                         tutor: active
                         admin: active
-                      photo: "1718364085578-What-is-landscape-photography.jpg"
+                      photo: 1718364085578-What-is-landscape-photography.jpg
                       professionalSummary: Experienced tutor with 10 years of experience in language teaching.
                       enrolledUsers: []
                       subject:
-                        _id: "65660fbbcb972798c401a9b4"
+                        _id: 65660fbbcb972798c401a9b4
                         name: English
                       category:
-                        _id: "64884f4dfdc2d1a130c24ac6"
+                        _id: 64884f4dfdc2d1a130c24ac6
                         appearance:
-                          icon: "mocked-path-to-icon"
-                          color: "#F67C41"
+                          icon: mocked-path-to-icon
+                          color: '#F67C41'
                       FAQ:
                         - question: What is the course duration?
                           answer: The course lasts for 8 weeks.
-                          _id: "666c2ecf89ff51666ab11a4b"
+                          _id: 666c2ecf89ff51666ab11a4b
                         - question: Are there any prerequisites?
                           answer: Basic English knowledge is required.
-                          _id: "666c2ecf89ff51666ab11a4c"
-                      createdAt: "2024-06-14T11:51:43.406Z"
-                      updatedAt: "2024-06-14T13:45:22.406Z"
+                          _id: 666c2ecf89ff51666ab11a4c
+                      createdAt: 2024-06-14T11:51:43.406Z
+                      updatedAt: 2024-06-14T13:45:22.406Z
                     authorRole: student
-                    text: "Hi, do you want to start cooperation with me?"
+                    text: Hi, do you want to start cooperation with me?
                     isRead: false
                     isNotified: true
-                    chat: "6421d9833cdf38b706756dfd"
-                    createdAt: "2023-01-20T13:25:36.292Z"
-                    updatedAt: "2023-01-20T13:25:36.292Z"
+                    chat: 6421d9833cdf38b706756dfd
+                    createdAt: 2023-01-20T13:25:36.292Z
+                    updatedAt: 2023-01-20T13:25:36.292Z
                 count: 1
         401:
           description: Unauthorized
