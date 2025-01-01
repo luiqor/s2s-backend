@@ -23,7 +23,7 @@ paths:
             schema:
               $ref: '#/definitions/messageBody'
             example:
-              text: Hi, you want to start cooperation with me?
+              text: Hi, do you want to start cooperation with me?
       responses:
         201:
           description: OK
@@ -32,10 +32,10 @@ paths:
               schema:
                 $ref: '#/definitions/message'
               example:
-                - _id: 64a28e8c5d56f749c7d915d0
+                  _id: 64a28e8c5d56f749c7d915d0
                   author: 6421d9833cdf38b706756dff
                   authorRole: student
-                  text: Hi, you want to start cooperation with me?
+                  text: Hi, do you want to start cooperation with me?
                   isRead: false
                   isNotified: true
                   chat: 6421d9833cdf38b706756dfd

@@ -19,6 +19,8 @@ definitions:
     properties:
       _id:
         type: string
+      author:
+        type: string
       authorRole:
         type: string
         enum:
