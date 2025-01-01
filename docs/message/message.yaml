@@ -65,7 +65,7 @@ paths:
         - name: id
           in: path
           required: true
-          description: ID of the chat from which messages need to be fetched.
+          description: ID of the chat from which messages need to be fetched
           schema:
             type: string
         - in: query
@@ -73,19 +73,19 @@ paths:
           schema:
             type: integer
           required: false
-          description: Limit on the number of messages to fetch.
+          description: Limit on the number of messages to fetch
         - in: query
           name: skip
           schema:
             type: integer
           required: false
-          description: Number of messages to skip.
+          description: Number of messages to skip
         - in: query
           name: message
           schema:
             type: string
           required: false
-          description: Filter messages containing this text.
+          description: Filter messages containing this text
       responses:
         200:
           description: OK
