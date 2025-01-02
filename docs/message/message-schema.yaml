@@ -28,10 +28,6 @@ definitions:
           - tutor
       text:
         type: string
-      isRead:
-        type: boolean
-      isNotified:
-        type: boolean
       chat:
         type: string
       clearedFor:

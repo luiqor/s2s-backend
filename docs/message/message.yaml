@@ -36,8 +36,6 @@ paths:
                   author: 6421d9833cdf38b706756dff
                   authorRole: student
                   text: Hi, do you want to start cooperation with me?
-                  isRead: false
-                  isNotified: true
                   chat: 6421d9833cdf38b706756dfd
                   clearedFor: []
                   createdAt: 2023-20-01T13:25:36.292Z
@@ -133,8 +131,6 @@ paths:
                       updatedAt: 2024-06-14T13:45:22.406Z
                     authorRole: student
                     text: Hi, do you want to start cooperation with me?
-                    isRead: false
-                    isNotified: true
                     chat: 6421d9833cdf38b706756dfd
                     createdAt: 2023-01-20T13:25:36.292Z
                     updatedAt: 2023-01-20T13:25:36.292Z
