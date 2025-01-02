@@ -25,7 +25,7 @@ module.exports = {
     )
     await attachmentsCollection.updateMany(
       { resourceType: { $exists: true } },
-      { $unset: { resourceType: 'attachment' } }
+      { $unset: { resourceType: 'attachments' } }
     )
   }
 }
