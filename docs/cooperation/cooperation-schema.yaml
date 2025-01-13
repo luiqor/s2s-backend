@@ -54,11 +54,11 @@ definitions:
       initiator:
         $ref: '#/definitions/userInCooperationsExtended'
       initiatorRole:
-        type: string
+        $ref: '#/definitions/baseUserRoleEnum'
       receiver:
         $ref: '#/definitions/userInCooperationsExtended'
       receiverRole:
-        type: string
+        $ref: '#/definitions/baseUserRoleEnum'
       title:
         type: string
       additionalInfo:
@@ -97,7 +97,7 @@ definitions:
       receiver:
         type: string
       receiverRole:
-        type: string
+        $ref: '#/definitions/baseUserRoleEnum'
       price:
         type: number
       title:
@@ -228,27 +228,9 @@ definitions:
       status:
         $ref: '#/definitions/roleBasedStatus'
       professionalBlock:
-        type: object
-        properties:
-          awards:
-            type: string
-          scientificActivities:
-            type: string
-          workExperience:
-            type: string
-          education:
-            type: string
+        $ref: '#/definitions/userProfessionalBlock'
       notificationSettings:
-        type: object
-        properties:
-          isOfferStatusNotification:
-            type: boolean
-          isChatNotification:
-            type: boolean
-          isSimilarOffersNotification:
-            type: boolean
-          isEmailNotification:
-            type: boolean
+        $ref: '#/definitions/userNotificationSettings'
       createdAt:
         type: string
         format: date-time
@@ -256,12 +238,7 @@ definitions:
         type: string
         format: date-time
       address:
-        type: object
-        properties:
-          city:
-            type: string
-          country:
-            type: string
+        $ref: '#/definitions/userAddress'
       photo:
         type: string
       professionalSummary:
