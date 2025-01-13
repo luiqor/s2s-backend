@@ -12,7 +12,7 @@ const messageFields = [
   'createdAt',
   'updatedAt'
 ]
-const MAIN_ROLE_ENUM = ['tutor', 'student']
+const { enums } = require('~/consts/validation')
 
 describe('Message model', () => {
   let server, messages
@@ -58,7 +58,7 @@ describe('Message model', () => {
 
   it('should have valid authorRole values', () => {
     for (const message of messages) {
-      expect(MAIN_ROLE_ENUM).toContain(message.authorRole)
+      expect(enums.MAIN_ROLE_ENUM).toContain(message.authorRole)
     }
   })
 
