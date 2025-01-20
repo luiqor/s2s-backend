@@ -64,7 +64,7 @@ const quizSchema = new Schema(
           values: QUIZ_TIME_LIMIT,
           message: ENUM_CAN_BE_ONE_OF('quiz time limit', QUIZ_TIME_LIMIT)
         },
-        default: QUIZ_TIME_LIMIT[1]
+        default: QUIZ_TIME_LIMIT[0]
       },
       attemptLimit: {
         type: String,
@@ -72,7 +72,7 @@ const quizSchema = new Schema(
           values: QUIZ_ATTEMPT_LIMIT,
           message: ENUM_CAN_BE_ONE_OF('quiz attempt limit', QUIZ_ATTEMPT_LIMIT)
         },
-        default: QUIZ_ATTEMPT_LIMIT[1]
+        default: QUIZ_ATTEMPT_LIMIT[0]
       },
       shuffle: {
         type: Boolean,
