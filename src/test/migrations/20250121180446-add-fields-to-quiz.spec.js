@@ -42,8 +42,6 @@ describe('Migration: Add fields to quizzes', () => {
   })
 
   it('down() should remove fields from settings', async () => {
-    await migration.up(mongoose.connection.db)
-
     await migration.down(mongoose.connection.db)
 
     const quizzes = await Quiz.find().lean()
