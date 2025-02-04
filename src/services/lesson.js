@@ -62,6 +62,10 @@ const lessonService = {
 
   getLessonById: async (id) => {
     return await Lesson.findById(id).populate('attachments').lean().exec()
+  },
+
+  deleteLessonsByAuthor: async (author) => {
+    await Lesson.deleteMany({ author })
   }
 }
 
