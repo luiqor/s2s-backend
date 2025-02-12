@@ -1,4 +1,4 @@
-name: PR (develop branch)
+name: PR (develop)
 
 on:
   pull_request:
