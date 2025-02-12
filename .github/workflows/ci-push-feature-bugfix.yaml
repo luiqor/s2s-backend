@@ -1,8 +1,8 @@
-name: Push (feature/** branch)
+name: Push (feature & bugfix)
 
 on:
   push:
-    branches: ['feature/**']
+    branches: ['feature/**', 'bugfix/**']
 
 jobs:
   run-tests:
