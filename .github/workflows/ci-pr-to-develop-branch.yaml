@@ -94,7 +94,7 @@ jobs:
           COOKIE_DOMAIN: ${{ secrets.COOKIE_DOMAIN }}
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v4.1.0
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         if: success() || failure()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -160,9 +160,6 @@ jobs:
             -e GMAIL_REDIRECT_URI=${{ secrets.GMAIL_REDIRECT_URI }} \
             -e COOKIE_DOMAIN=${{ secrets.COOKIE_DOMAIN }} \
             --link mongodb be-app
-      
-      - name: Retrieve Application Logs
-        run: docker logs be-app
       
       - name: API Health Check and Report
         run: |
