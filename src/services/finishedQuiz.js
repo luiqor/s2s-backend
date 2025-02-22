@@ -33,7 +33,7 @@ const finishedQuizService = {
   },
 
   getFinishedQuizByQuizId: async (quizId, cooperationId) => {
-    return await FinishedQuiz.find({ quiz: quizId, cooperation: cooperationId }).lean().exec()
+    return await FinishedQuiz.find({ quiz: quizId, cooperation: cooperationId })
   },
 
   getFinishedQuizById: async (id) => {

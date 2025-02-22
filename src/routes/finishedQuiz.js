@@ -15,7 +15,7 @@ router.param('id', idValidation)
 
 router.get('/', asyncWrapper(finishedQuizController.getFinishedQuizzes))
 router.get('/:id', asyncWrapper(finishedQuizController.getFinishedQuizById))
-router.get('/by-quiz-id/:cooperationId/:quizId', asyncWrapper(finishedQuizController.getFinishedQuizByQuizId))
+router.get('/:cooperationId/:quizId', asyncWrapper(finishedQuizController.getFinishedQuizByQuizId))
 router.post('/', isEntityValid({ body }), asyncWrapper(finishedQuizController.createFinishedQuiz))
 router.patch('/:id', asyncWrapper(finishedQuizController.updateFinishedQuiz))
 

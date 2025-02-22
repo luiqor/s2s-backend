@@ -272,13 +272,13 @@ paths:
                 status: 404
                 code: NOT_FOUND
                 message: Quiz with the specified id was not found.
-  /finished-quizzes/by-quiz-id/{cooperationId}/{quizId}:
+  /finished-quizzes/{cooperationId}/{quizId}:
     get:
       security:
         - cookieAuth: []
       tags:
         - Finished quizzes
-      summary: Find finished quiz by id.
+      summary: Find finished quiz by quiz and cooperation id.
       description: Finds and returns a single finished quiz.
       produces:
         - application/json
