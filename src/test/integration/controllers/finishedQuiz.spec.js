@@ -190,7 +190,7 @@ describe('Quiz controller', () => {
       it('should get finished quiz', async () => {
         const quiz = testQuiz._id
         const cooperation = testCooperation._id
-        const fullUrl = `${endpointUrl}by-quiz-id/${cooperation}/${quiz}`
+        const fullUrl = `${endpointUrl}${cooperation}/${quiz}`
         const response = await app.get(fullUrl).set('Cookie', [`accessToken=${accessToken}`])
 
         expect(response.statusCode).toBe(200)
@@ -211,6 +211,7 @@ describe('Quiz controller', () => {
         expectError(401, UNAUTHORIZED, response)
       })
     }),
+    
     describe(`GET ${endpointUrl}:id`, () => {
       it('should get finished quiz', async () => {
         const finishedQuizId = testFinishedQuiz._body._id
