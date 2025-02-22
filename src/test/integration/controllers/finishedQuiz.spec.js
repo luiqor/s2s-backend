@@ -186,7 +186,7 @@ describe('Quiz controller', () => {
         expectError(401, UNAUTHORIZED, response)
       })
     }),
-    describe(`GET ${endpointUrl}by-quiz-id/:cooperationId/:quizId`, () => {
+    describe(`GET ${endpointUrl}:cooperationId/:quizId`, () => {
       it('should get finished quiz', async () => {
         const quiz = testQuiz._id
         const cooperation = testCooperation._id
