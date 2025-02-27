@@ -211,7 +211,6 @@ describe('Quiz controller', () => {
         expectError(401, UNAUTHORIZED, response)
       })
     }),
-    
     describe(`GET ${endpointUrl}:id`, () => {
       it('should get finished quiz', async () => {
         const finishedQuizId = testFinishedQuiz._body._id
