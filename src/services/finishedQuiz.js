@@ -4,7 +4,8 @@ const Quiz = require('~/models/quiz')
 const { createError } = require('~/utils/errorsHelper')
 
 const { QUIZ_TIME_LIMIT_EXCEEDED } = require('~/consts/errors')
-
+const cooperationService = require('~/services/cooperation')
+const { NOT_USERS_ATTEMPTS } = require('~/consts/errors')
 const {
   roles: { STUDENT }
 } = require('~/consts/auth')
@@ -32,7 +33,13 @@ const finishedQuizService = {
     })
   },
 
-  getFinishedQuizByQuizId: async (quizId, cooperationId) => {
+  getFinishedQuizByQuizId: async (quizId, cooperationId, userId) => {
+    const cooperation = await cooperationService.getCooperationById(cooperationId)
+
+    if (cooperation.initiator !== userId && cooperation.receiver !== userId) {
+      throw createError(403, NOT_USERS_ATTEMPTS)
+    }
+
     return await FinishedQuiz.find({ quiz: quizId, cooperation: cooperationId })
   },
 

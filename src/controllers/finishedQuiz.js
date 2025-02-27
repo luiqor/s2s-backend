@@ -1,7 +1,4 @@
 const finishedQuizService = require('~/services/finishedQuiz')
-const cooperationService = require('~/services/cooperation')
-const { createError } = require('~/utils/errorsHelper')
-const { NOT_USERS_ATTEMPTS } = require('~/consts/errors')
 const getFinishedQuizzes = async (req, res) => {
   const { skip, limit } = req.query
   const { id: author } = req.user
@@ -31,13 +28,7 @@ const getFinishedQuizByQuizId = async (req, res) => {
   const { quizId, cooperationId } = req.params
   const { userId } = req.user
 
-  const cooperation = await cooperationService.getCooperationById(cooperationId)
-
-  if (cooperation.initiator !== userId && cooperation.receiver !== userId) {
-    throw createError(403, NOT_USERS_ATTEMPTS)
-  }
-
-  const finishedQuizzes = await finishedQuizService.getFinishedQuizByQuizId(quizId, cooperationId)
+  const finishedQuizzes = await finishedQuizService.getFinishedQuizByQuizId(quizId, cooperationId, userId)
 
   res.status(200).json(finishedQuizzes)
 }
