@@ -278,16 +278,23 @@ paths:
         - cookieAuth: []
       tags:
         - Finished quizzes
-      summary: Find finished quiz by quiz and cooperation id.
+      summary: Find finished quiz by quiz and cooperation ID.
       description: Finds and returns a single finished quiz.
       produces:
         - application/json
       parameters:
-        - in: id
-          name: id
+        - in: path
+          name: cooperationId
           required: true
-          description: ID of the finished quiz that needs to be fetched
-          type: string
+          description: ID of the cooperation.
+          schema:
+            type: string
+        - in: path
+          name: quizId
+          required: true
+          description: ID of the quiz.
+          schema:
+            type: string
       responses:
         200:
           description: OK
