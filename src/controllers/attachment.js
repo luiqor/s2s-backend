@@ -37,6 +37,15 @@ const createAttachments = async (req, res) => {
   res.status(201).json(attachments)
 }
 
+const duplicateAttachment = async (req, res) => {
+  const { id } = req.params
+  const { id: currentUser } = req.user
+
+  const attachment = await attachmentService.duplicateAttachment(id, currentUser)
+
+  res.status(201).json(attachment)
+}
+
 const updateAttachment = async (req, res) => {
   const { id } = req.params
   const { id: currentUser } = req.user
@@ -59,6 +68,7 @@ const deleteAttachment = async (req, res) => {
 module.exports = {
   getAttachments,
   createAttachments,
+  duplicateAttachment,
   updateAttachment,
   deleteAttachment
 }

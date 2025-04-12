@@ -36,6 +36,30 @@ const attachmentService = {
     )
   },
 
+  duplicateAttachment: async (id, currentUser) => {
+    const attachment = await Attachment.findById(id).exec()
+
+    if (!attachment) {
+      throw createError(404, DOCUMENT_NOT_FOUND(attachment.modelName))
+    }
+
+    if (currentUser !== attachment.author.toString()) {
+      throw createForbiddenError()
+    }
+
+    return await Attachment.create({
+      ...attachment.toObject({
+        transform: (_, attachmentData) => {
+          delete attachmentData._id
+          return attachmentData
+        }
+      }),
+      isDuplicate: true,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    })
+  },
+
   updateAttachment: async (id, currentUser, updateData) => {
     const { fileName, description, category } = updateData
 

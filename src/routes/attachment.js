@@ -22,6 +22,7 @@ router.param('id', idValidation)
 
 router.get('/', asyncWrapper(attachmentController.getAttachments))
 router.post('/', upload.array('files'), asyncWrapper(attachmentController.createAttachments))
+router.post('/duplicate/:id', isEntityValid({ params }), asyncWrapper(attachmentController.duplicateAttachment))
 router.use(
   '/:id',
   isEntityValid({ params }),
